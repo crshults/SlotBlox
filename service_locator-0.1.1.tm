@@ -36,7 +36,6 @@ package provide service_locator 0.1.1
 
 package require udp
 package require TclOO
-source system_info-0.1.0.tm
 
 oo::class create service_locator {
 
@@ -133,6 +132,10 @@ oo::class create service_locator {
 		]
 
 		set _finding yes
+
+		# get the current set of broadcast addresses for the system
+		package forget  system_info
+		package require system_info
 
 		# Send the request broadcast
 		# Doing this last to avoid tkcon race conditions
