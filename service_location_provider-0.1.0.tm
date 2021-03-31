@@ -38,7 +38,7 @@ package provide service_location_provider 0.1.0
 
 package require udp
 package require TclOO
-source system_info-0.1.0.tm
+package require system_info
 
 oo::class create service_location_provider {
 
@@ -84,6 +84,13 @@ oo::class create service_location_provider {
 				] end end 255
 			] .
 		]
+
+		# The client is on the localhost address so use the local broadcast
+		# address
+		if {$sender_ip_address eq "127.0.0.1"} {
+
+			set sender_broadcast_address "127.255.255.255"
+		}
 
 		# Service connection details will not be disclosed outside this IP
 		# Address for services that are declared as local.
