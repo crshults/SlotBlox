@@ -32,9 +32,6 @@
 # * 1 second until a response is received.
 # *
 
-# TODO: We need a short circuit case for when all we have available to us is the
-# localhost since the broadcast address list will be empty
-
 package provide service_locator 0.1.1
 
 package require udp
