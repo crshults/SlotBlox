@@ -42,7 +42,21 @@ package require system_info
 
 oo::class create service_location_provider {
 
-	variable _udp_socket _service_name _scope _service_port
+	# The Service Location Provider will use a UDP socket to listen for requests
+	# to retrieve the connection details of the service that is being provided
+	variable _udp_socket
+
+	# The name of the service we currently hold the connection details for
+	variable _service_name
+
+	# The scope of the service is defined as either global or local, which
+	# determines whether or not we will provide connection details to a
+	# requester
+	variable _scope
+
+	# The TCP port where the service resides that we are providing connection
+	# details about
+	variable _service_port
 
 	constructor {service_name scope service_port} {
 
