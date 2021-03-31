@@ -32,6 +32,9 @@
 # * 1 second until a response is received.
 # *
 
+# TODO: We need a short circuit case for when all we have available to us is the
+# localhost since the broadcast address list will be empty
+
 package provide service_locator 0.1.1
 
 package require udp
@@ -142,6 +145,14 @@ oo::class create service_locator {
 		foreach broadcast_address $system_info::broadcast_addresses {
 
 			chan configure $_udp_socket -remote [list $broadcast_address 15353]
+			chan puts -nonewline $_udp_socket "service find $service_name"
+		}
+
+		if {[llength $system_info::broadcast_addresses] eq 0} {
+
+			# No broadcast addresses were found so use the localhost broadcast
+			# address.
+			chan configure $_udp_socket -remote [list 127.255.255.255 15353]
 			chan puts -nonewline $_udp_socket "service find $service_name"
 		}
 
