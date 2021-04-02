@@ -32,7 +32,7 @@
 # * 1 second until a response is received.
 # *
 
-package provide service_locator 0.1.1
+package provide service_locator 0.1.0
 
 package require udp
 package require TclOO
@@ -107,14 +107,14 @@ oo::class create service_locator {
 				lrange $message 0 2
 			]] eq 0} {
 
+			# Cancel the pending retry and go back to the not finding state.
+			after cancel $_scheduled_retry
+			set _finding no
+
 			# Relay the IP Address and the port number of the service back to
 			# the client so they can make the appropriate TCP connection to the
 			# service.
 			catch {{*}$_service_located_callback [list $ip_address $port]}
-
-			# Cancel the pending retry and go back to the not finding state.
-			after cancel $_scheduled_retry
-			set _finding no
 		}
 	}
 
