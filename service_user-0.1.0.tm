@@ -59,31 +59,48 @@ oo::class create service_user {
 		set _connected_callback $connected_callback
 		set _disconnected_callback $disconnected_callback
 		set _service_locator [service_locator new]
+
+		# Upon creation, start trying to locate the service we wish to use at
+		# the first available opportunity.
 		after idle [list [self] find_service]
+
+		# Signal to the application that we are currently in a disconnected
+		# state
 		catch {$_disconnected_callback}
 	}
 
 	destructor {
 
+		# On destruction, close down the communications channel and destroy the
+		# service locator
 		catch {chan close $_client_socket}
 		$_service_locator destroy
 	}
 
 	method find_service {} {
 
+		# Make sure when we are in the finding state that the communications
+		# channel is in a closed state.
 		catch {chan close $_client_socket}
 
+		# If we started finding the service again after previously being
+		# connected, notify the application that we are in a disconnected state
+		# now.
 		if {$_connected} {
 
 			catch {$_disconnected_callback}
 		}
 
+		# Flag that we are not connected and start the service locator's finding
+		# process.
 		set _connected no
 		$_service_locator find $_service_name [list [self] service_found]
 	}
 
 	method service_found {address} {
 
+		# The service has been found so take the service connection details and
+		# store them, then connect to the service.
 		set _address [lindex $address 0]
 		set _port [lindex $address 1]
 		my connect
@@ -91,55 +108,81 @@ oo::class create service_user {
 
 	method connect {} {
 
+		# Ensure the communications channel is in a closed state before we
+		# attempt to make a connection.
 		catch {chan close $_client_socket}
+
+		# Flag that we are not yet connected and start the asynchronous
+		# connection process.
 		set _connected no
 		set _client_socket [socket -async $_address $_port]
 		set _awaiting_connection_result yes
+
+		# Configure the communications channel to exchange data properly with
+		# the service provider.
 		chan configure $_client_socket -blocking no -buffering line \
 			-encoding iso8859-1 -translation binary
+
+		# Subscribe the channel communications events.
 		chan event $_client_socket readable [list [self] read_data]
 		chan event $_client_socket writable [list [self] connection_result]
 	}
 
 	method connection_result {} {
 
+		# When the communications channel makes a connection or times out trying
+		# to make a connection, the writable event will fire.
 		set _awaiting_connection_result no
 
 		if {[chan configure $_client_socket -error] == ""} {
 
+			# If there is no error, then we have successfully made a connection.
 			set _connected yes
 			catch {$_connected_callback}
 
 		} else {
 
+			# Otherwise unsubscribe from the readable event and start the
+			# process of locating the service again.
 			chan event $_client_socket readable {}
 			after idle [list [self] find_service]
 		}
 
+		# Unsubscribe from the wriatable event
 		chan event $_client_socket writable {}
 	}
 
 	method read_data {} {
 
-		if {[chan configure $_client_socket -error] != "" && !$_awaiting_connection_result} {
+		if {[chan configure $_client_socket -error] != "" &&
+		    !$_awaiting_connection_result} {
 
+			# When there is an error on the channel and we are not waiting for
+			# the asynchronous connection to be established, go back to the
+			# process of locating the service.
 			my find_service
 			return
 		}
 
 		if {[catch {set message [chan gets $_client_socket]}]} {
 
+			# If an unexpected error occurs while trying to read a message from
+			# the communications channel, go back to the process of locating the
+			# service.
 			my find_service
 			return
 		}
 
 		if {[string length $message]} {
 
+			# If there is a message, forward it to the application.
 			{*}$_callback $message
 		}
 
 		if {[chan eof $_client_socket]} {
 
+			# If the communications channel has reached end-of-file, go back to
+			# the process of locating the service.
 			my find_service
 			return
 		}
@@ -149,8 +192,12 @@ oo::class create service_user {
 
 		if {$_connected} {
 
+			# Send a message to the service provider
 			if {[catch {chan puts $_client_socket $message}]} {
 
+				# If an unexpected error occurs while trying to send a message
+				# through the communications channel, go back to the process of
+				# locating the service.
 				my find_service
 				error "client not connected"
 			}
