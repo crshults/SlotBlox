@@ -1,0 +1,29 @@
+* {
+	background-color: black;
+	border: 0 none;
+	margin: 0;
+	padding: 0;
+	user-select: none;
+}
+
+#screen {
+	position: absolute;
+	transform-style: preserve-3d;
+	/*backface-visibility: hidden;*/
+}
+
+#name {
+	position: absolute;
+	left: 0%;
+	top: 20%;
+	width: 100%;
+	height: 10%;
+}
+
+#credits {
+	position: absolute;
+	left: 40%;
+	top: 70%;
+	width: 20%;
+	height: 10%;
+}
