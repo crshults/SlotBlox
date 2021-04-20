@@ -1,3 +1,4 @@
+REM This is a comment!
 tclkit-8.6.9-windows.exe sdx.kit wrap TickTackDoughGameCartridge-1_0.exe -runtime tclkit-8.6.9-windows-runtime.exe
 move /y TickTackDoughGameCartridge-1_0.exe TickTackDoughGameCartridge-1_0-windows.exe
 
