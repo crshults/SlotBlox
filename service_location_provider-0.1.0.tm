@@ -1,18 +1,18 @@
 # ******************************************************************************
 # MIT License
-# 
+#
 # Copyright © 2021 Chris Shults
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -76,7 +76,8 @@ oo::class create service_location_provider {
 		# immediately sent, and so reads will not hang when no data is available
 		chan configure $_udp_socket \
 			-blocking  0            \
-			-buffering none
+			-buffering none         \
+			-broadcast 1
 
 		# Wire up the event handler to read received broadcasts
 		chan event $_udp_socket readable [list [self] handle_received_message]
@@ -89,8 +90,8 @@ oo::class create service_location_provider {
 
 	method handle_received_message {} {
 
-		set sender_ip_address [lindex [chan configure $_udp_socket -peer] 0]
 		set message [chan read $_udp_socket]
+		set sender_ip_address [lindex [chan configure $_udp_socket -peer] 0]
 		set sender_broadcast_address [
 			join [
 				lreplace [
