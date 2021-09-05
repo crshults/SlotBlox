@@ -47,6 +47,7 @@ if {![catch {exec ipconfig} ipconfig_output]} {
 	# Each IPv4 Addresses will be ranked according to how many IPv6 Addresses it
 	# is accompanied by.
 	set ranked_ip_addresses [list]
+	set ipv6_count 0
 
 	# Extract all the lines from the ipconfig output that contain IPv4 or IPv6
 	# addresses
@@ -100,6 +101,7 @@ if {![catch {exec ifconfig} ifconfig_output]} {
 	# Each IPv4 Addresses will be ranked according to how many IPv6 Addresses it
 	# is accompanied by.
 	set ranked_ip_addresses [list]
+	set inet6_count 0
 
 	# Extract all the lines from the ipconfig output that contain IPv4 or IPv6
 	# addresses
@@ -158,6 +160,7 @@ if {![info exists system_info::ip_addresses]} {
 		# Each IPv4 Addresses will be ranked according to how many IPv6
 		# Addresses it is accompanied by.
 		set ranked_ip_addresses [list]
+		set inet6_count 0
 
 		# Extract all the lines from the ipconfig output that contain IPv4 or
 		# IPv6 addresses
